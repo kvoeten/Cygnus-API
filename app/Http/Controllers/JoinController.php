@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\User;
 use App\Activation;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
@@ -18,24 +19,42 @@ class JoinController extends Controller {
 		$password = $request->get('password');
 		$email = $request->get('email');
 		
+		$client = new Client();
+    
+        $response = $client->post(
+            'https://www.google.com/recaptcha/api/siteverify',
+            ['form_params'=>
+                [
+                    'secret'=> env('CAPTCHA_SECRET', null),
+                    'response'=>$request->get('g-recaptcha-response')
+                 ]
+            ]
+        );
+    
+        $body = json_decode((string)$response->getBody());
+		
+		if (!$body->success) {
+			return $this->error("Improper Captcha Response.", 200);
+		}
+		
 		if (strlen($request->get('name')) < 3) {
-			return $this->error("The provided name is too short. (At least three characters required.)", 404);
+			return $this->error("The provided name is too short. (At least three characters required.)", 200);
 		}
 		
 		if (strlen($request->get('name')) > 40) {
-			return $this->error("The provided name is too long. (At max. fourty characters are allowed.)", 404);
+			return $this->error("The provided name is too long. (At max. fourty characters are allowed.)", 200);
 		}
 		
 		if (User::where('email', '=', $email)->exists()) {
-		    return $this->error("The provided email adress is already registered.", 404);
+		    return $this->error("The provided email adress is already registered.", 200);
 		}
 		
 		if (User::where('name', '=', $request->get('name'))->exists()) {
-		    return $this->error("That name is already taken.", 404);
+		    return $this->error("That name is already taken.", 200);
 		}
 		
 		if ($password != $request->get('password_confirmation')) {
-			return $this->error("The provided passwords don't match.", 404);
+			return $this->error("The provided passwords don't match.", 200);
 		}
 			
 		$user = User::create([
@@ -69,7 +88,8 @@ class JoinController extends Controller {
 			'name' => 'required', 
 			'email' => 'required',
 			'password' => 'required',
-			'password_confirmation' => 'required'
+			'password_confirmation' => 'required',
+			'g-recaptcha-response' => 'required'
 		];
 		$this->validate($request, $rules);
 	}

@@ -15,41 +15,52 @@ $router->get('/', function () use ($router) {
     return 'Cygnus API powered by: '.$router->app->version();
 });
 
-// Authorization required enpointes
+/*
+ * OAuth2 Protected endpoints. (Center endpoints are user id=1)
+*/
 $router->group(['middleware' => 'auth'], function () use ($router) {
 	
-	// Login, Logout
-    $router->post('/login','LoginController@login');
-	$router->post('/logout','LoginController@logout');
+	// ANY USER: User information
+    $router->post('/login','LoginController@login'); //login on Aria-based website
+	$router->post('/logout','LoginController@logout'); //logout (invalidates token)
+	$router->get('/user','LoginController@user'); //show user info
+	$router->get('/account','AccountController@show'); //get cygnus account
 	
-	// Set Server Information
-	$router->post('/server','ServerController@set');
-	
-	// News Editing
+	// ADMIN USER: News Editing
 	$router->post('/news','NewsController@store');
 	$router->put('/post/{news_id}', 'NewsController@update');
 	$router->delete('/post/{news_id}', 'NewsController@destroy');
 	
+	// CENTER USER
+	$router->post('/server','ServerController@set'); //Post Server Information
+	$router->post('/ranking', 'RankingController@store'); //Post Avatar/Ranking data
+	$router->post('/ban','AccountController@ban'); //Ban User
+	$router->get('/blocklist','ServerController@blocklist'); //Get blocklist
+	$router->post('/account','AccountController@store'); //alter cygnus account
+	
 });
 
-$router->post('/ranking', 'RankingController@store');
+/*
+ * Public endpoints.
+*/
+
+// Get Avatar/Ranking information
 $router->get('/ranking', 'RankingController@show');
 $router->get('/avatar/{name}', 'AvatarController@show');
-
 
 // Get Server Information
 $router->get('/server','ServerController@get');
 
-// Images
+// Get Images
 $router->get('/image/{name}','AssetController@show');
 
-// News
+// Get News
 $router->get('/news/all','NewsController@index');
 $router->get('/news','NewsController@page');
 $router->get('/news/{page_id}','NewsController@page');
 $router->get('/post/{news_id}','NewsController@show');
 
-// User
+// User Creation
 $router->post('/join','JoinController@store');
 $router->get('/verify','LoginController@verify');
 
