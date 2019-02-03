@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Dusterio\LumenPassport\LumenPassport;

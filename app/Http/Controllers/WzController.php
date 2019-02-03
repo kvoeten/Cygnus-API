@@ -7,6 +7,7 @@ use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class WzController extends Controller {
 
@@ -50,9 +51,11 @@ class WzController extends Controller {
       return $this->error("Error. Mob not found.", 404);
     }
     if (!file_exists($path.".png")) {
-      $mob = json_decode(readfile($path));
+      $mob = json_decode(file_get_contents($path.".json"));
       $image = imagecreatefromstring(base64_decode($mob->icon));
-      imagepng($image, $path.".png")
+	    $black = imagecolorallocate($image, 0, 0, 0);
+	    imagecolortransparent($image, $black);
+      imagepng($image, $path.".png");
     }
     $headers = ['Content-Type' => 'image/png', 'Content-Disposition' => 'inline'];
 		$response = new BinaryFileResponse($path.".png", 200, $headers);
@@ -66,9 +69,11 @@ class WzController extends Controller {
       return $this->error("Error. Item not found.", 404);
     }
     if (!file_exists($path.".png")) {
-      $mob = json_decode(readfile($path));
-      $image = imagecreatefromstring(base64_decode($mob->icon));
-      imagepng($image, $path.".png")
+      $map = json_decode(file_get_contents($path.".json"));
+      $image = imagecreatefromstring(base64_decode($map->icon));
+	    $black = imagecolorallocate($image, 0, 0, 0);
+	    imagecolortransparent($image, $black);
+      imagepng($image, $path.".png");
     }
     $headers = ['Content-Type' => 'image/png', 'Content-Disposition' => 'inline'];
 		$response = new BinaryFileResponse($path.".png", 200, $headers);
@@ -82,9 +87,11 @@ class WzController extends Controller {
       return $this->error("Error. Npc not found.", 404);
     }
     if (!file_exists($path.".png")) {
-      $mob = json_decode(readfile($path));
-      $image = imagecreatefromstring(base64_decode($mob->icon));
-      imagepng($image, $path.".png")
+      $npc = json_decode(file_get_contents($path.".json"));
+      $image = imagecreatefromstring(base64_decode($npc->icon));
+	    $black = imagecolorallocate($image, 0, 0, 0);
+	    imagecolortransparent($image, $black);
+      imagepng($image, $path.".png");
     }
     $headers = ['Content-Type' => 'image/png', 'Content-Disposition' => 'inline'];
 		$response = new BinaryFileResponse($path.".png", 200, $headers);
@@ -98,9 +105,11 @@ class WzController extends Controller {
       return $this->error("Error. Map not found.", 404);
     }
     if (!file_exists($path.".png")) {
-      $mob = json_decode(readfile($path));
-      $image = imagecreatefromstring(base64_decode($mob->icon));
-      imagepng($image, $path.".png")
+      $map = json_decode(file_get_contents($path.".json"));
+      $image = imagecreatefromstring(base64_decode($map->icon));
+	    $black = imagecolorallocate($image, 0, 0, 0);
+	    imagecolortransparent($image, $black);
+      imagepng($image, $path.".png");
     }
     $headers = ['Content-Type' => 'image/png', 'Content-Disposition' => 'inline'];
 		$response = new BinaryFileResponse($path.".png", 200, $headers);
