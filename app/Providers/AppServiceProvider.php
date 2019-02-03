@@ -8,19 +8,11 @@ use Illuminate\Contracts\Mail\Mailer;
 
 class AppServiceProvider extends ServiceProvider
 {
-	
-	public function boot()
-	{
-		Schema::defaultStringLength(191);
-	}
-	
-    /**
-     * Register any application services.
-     *
-     * @return void
-     */
-    public function register()
-    {
-		//
-    }
+
+	  public function boot()
+	  {
+		  Schema::defaultStringLength(191);
+	  }
+
+    public function register() {}
 }

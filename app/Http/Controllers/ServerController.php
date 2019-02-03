@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace App\Http\Controllers;
 
 use App\User;
@@ -8,16 +8,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ServerController extends Controller {
-	
-	public function __construct() {
-		//Can add auth middleware here i guess
-	}
-	
+
+	public function __construct() {}
+
 	//Only Accessible with token.
 	public function set(Request $request) {
-		//TODO
+		//TODO: handle setting new values.
 	}
-	
+
+	//TODO: Use actual realtime values.
 	public function get(Request $request) {
 		$data = [
 			'name' => "Cygnus",
