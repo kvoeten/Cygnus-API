@@ -14,41 +14,99 @@ class WzController extends Controller {
 	public function __construct() {}
 
   public function map($id) {
-    $path = "../resources/Map.wz/".$id.".json";
-    if (!file_exists($path)) {
-      return $this->error("Error. Map not found.", 404);
+    $wz = "../resources/Map.wz/".$id.".json";
+	  $info = "../resources/String.wz/map/".$id.".json";
+
+    if (!file_exists($wz)) {
+      return $this->error("Map not found.", 404);
     }
-    return $this->success(readfile($path), 200);
+
+		$string = null;
+    if (file_exists($info)) {
+      $string = json_decode(file_get_contents($info));
+    }
+
+		$map = json_decode(file_get_contents($wz));
+
+    return $this->success([
+			'info' => $string,
+			'wz' => $map
+		], 200);
   }
 
   public function npc($id) {
-    $path = "../resources/Npc.wz/".$id.".json";
-    if (!file_exists($path)) {
-      return $this->error("Error. Npc not found.", 404);
+    $wz = "../resources/Npc.wz/".$id.".json";
+	  $info = "../resources/String.wz/npc/".$id.".json";
+
+    if (!file_exists($wz)) {
+      return $this->error("Npc not found.", 404);
     }
-    return $this->success(readfile($path), 200);
+
+		$string = null;
+    if (file_exists($info)) {
+      $string = json_decode(file_get_contents($info));
+    }
+
+		$npc = json_decode(file_get_contents($wz));
+
+    return $this->success([
+			'info' => $string,
+			'wz' => $npc
+		], 200);
   }
 
   public function item($id) {
-    $path = "../resources/Item.wz/".$id.".json";
-    if (!file_exists($path)) {
-      return $this->error("Error. Item not found.", 404);
+    $wz = "../resources/Item.wz/".$id.".json";
+	  $info = "../resources/String.wz/item/".$id.".json";
+
+    if (!file_exists($wz)) {
+      return $this->error("Item not found.", 404);
     }
-    return $this->success(readfile($path), 200);
+
+		$string = null;
+    if (file_exists($info)) {
+      $string = json_decode(file_get_contents($info));
+    }
+
+		$item = json_decode(file_get_contents($wz));
+
+    return $this->success([
+			'info' => $string,
+			'wz' => $item
+		], 200);
   }
 
   public function mob($id) {
-    $path = "../resources/Mob.wz/".$id.".json";
-    if (!file_exists($path)) {
-      return $this->error("Error. Mob not found.", 404);
+    $wz = "../resources/Mob.wz/".$id.".json";
+	  $info = "../resources/String.wz/mob/".$id.".json";
+
+    if (!file_exists($wz)) {
+			$wz = "../resources/Mob2.wz/".$id.".json";
+			if (!file_exists($wz)) {
+      	return $this->error("Mob not found.", 404);
+			}
     }
-    return $this->success(readfile($path), 200);
+
+		$string = null;
+    if (file_exists($info)) {
+      $string = json_decode(file_get_contents($info));
+    }
+
+		$mob = json_decode(file_get_contents($wz));
+
+    return $this->success([
+			'info' => $string,
+			'wz' => $mob
+		], 200);
   }
 
   public function showMob($id) {
     $path = "../resources/Mob.wz/".$id;
     if (!file_exists($path.".json")) {
-      return $this->error("Error. Mob not found.", 404);
+			$path = "../resources/Mob2.wz/".$id;
+			if (!file_exists($path.".json")) {
+      	return $this->error("Mob not found.", 404);
+			}
     }
     if (!file_exists($path.".png")) {
       $mob = json_decode(file_get_contents($path.".json"));

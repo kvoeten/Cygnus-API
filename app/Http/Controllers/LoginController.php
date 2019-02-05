@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace App\Http\Controllers;
 
 use App\User;
@@ -10,14 +10,15 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
 class LoginController extends Controller {
-	
+
 	public function __construct() {}
-	
+
 	public function verify(Request $request) {
 		$rules = [
 			'token' => 'required'
 		];
 		$this->validate($request, $rules);
+
 		$activation = DB::table('activations')->where('activation_key', $request->get('token'))->first();
 		if ($activation) {
 			$user = DB::table('users')->where('email', $activation->email)->first();
@@ -32,16 +33,16 @@ class LoginController extends Controller {
 			return $this->DisplayVerificationResult(false, "Something went wrong :/", "The activation doesn't exist!");
 		}
 	}
-	
+
 	//Only Accessible with token.
 	public function user(Request $request) {
 		if(!$request->user()->email_verified_at) {
 			return $this->error(["This account hasn't been verified yet. Please verify the account first."], 404);
 		}
 		return $request->user();
-		
+
 	}
-	
+
 	//Only Accessible with token.
 	public function login(Request $request) {
 		if(!$request->user()->email_verified_at) {
@@ -52,9 +53,9 @@ class LoginController extends Controller {
 				'username' => $request->user()->name,
 				'gm_level' => 1
 				], 200);
-		
+
 	}
-	
+
 	//Only Accessible with token.
 	public function logout(Request $request) {
 		//You could basically invalidate the token here
@@ -65,7 +66,7 @@ class LoginController extends Controller {
 				'gm_level' => 0
 				], 200);
 	}
-	
+
 	public function DisplayVerificationResult($success, $message1, $message2) {
 			return "
 					<!DOCTYPE html>
