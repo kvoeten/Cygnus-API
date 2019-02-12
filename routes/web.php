@@ -16,7 +16,7 @@ $router->get('/', function () use ($router) {
 });
 
 /*
- * OAuth2 Protected endpoints. (Center endpoints are user id=1)
+ * OAuth2 Protected endpoints. (Admin/System endpoints are user ID <= 100)
 */
 $router->group(['middleware' => 'auth'], function () use ($router) {
 

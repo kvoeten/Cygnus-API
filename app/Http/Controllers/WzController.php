@@ -1,12 +1,8 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\User;
-use App\Activation;
-use GuzzleHttp\Client;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class WzController extends Controller {
@@ -177,7 +173,16 @@ class WzController extends Controller {
 
 	public function find(Request $request) {
 		$this->validateRequest($request);
-    //TODO: search through list WZ.
+		$results = DB::table('wz')->where([
+			['name', 'like', '%'.$request->get('name').'%'],
+			['type', $request->get('type')]
+			])->limit(5)->get();
+
+		if(count($results) == 0) {
+			return $this->error("Nothing found satisfying the search parameters.", 404);
+		} else {
+			return $this->success($results, 200);
+		}
 	}
 
 	public function validateRequest(Request $request) {
