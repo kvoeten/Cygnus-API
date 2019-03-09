@@ -39,6 +39,13 @@ class ServerController extends Controller {
 		
 		//TODO: handle setting new values.
 	}
+	
+	
+ 	//Linux only. 0 if alive, 1 if dead.
+    public function aliveCheck($ip) {
+    	$pingresult = exec("/bin/ping -n 3 $ip", $outcome, $status);
+        return $status == 0;
+  	}
 
 	public function get(Request $request) {
         $players = 0;
@@ -47,10 +54,10 @@ class ServerController extends Controller {
 		
 		foreach ($servers as $server) {
             $players += $server->users;
-			status.push([
+			array_push($status, [
                 'name' => $server->name,
-                'status' => aliveCheck($server->ip)
-            ])
+                'status' => $this->aliveCheck($server->ip)
+            ]);
 		}
         
 		$data = [
@@ -68,10 +75,4 @@ class ServerController extends Controller {
         
 		return $data;
     }
-
-  //Linux only. 0 if alive, 1 if dead.
-    function aliveCheck($ip) {
-    $pingresult = exec("/bin/ping -n 3 $ip", $outcome, $status);
-        return $status != 0;
-  }
 }
