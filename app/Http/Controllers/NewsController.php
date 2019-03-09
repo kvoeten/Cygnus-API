@@ -63,11 +63,11 @@ class NewsController extends Controller {
 			return $this->error("Unauthorized.", 401);
 		}
 		
-		$post = Post::create([
+		$post = News::create([
 					'title' => $request->get('title'),
 					'content'=> $request->get('content'),
 					'type' => $request->get('type'),
-					'author' => $this->getUserId()
+					'author' => $request->user()->name
 				]);
 		
 		return $this->success("The post with with id {$post->id} has been created", 201);
