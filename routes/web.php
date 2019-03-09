@@ -1,4 +1,21 @@
 <?php
+/*
+	This file is a part of the Cygnus API, a RESTful Lumen based API.
+    Copyright (C) 2018 Kaz Voeten
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 
 /*
 |--------------------------------------------------------------------------
@@ -16,27 +33,27 @@ $router->get('/', function () use ($router) {
 });
 
 /*
- * OAuth2 Protected endpoints. (Admin/System endpoints are user ID <= 100)
+ * OAuth2 Protected endpoints.
 */
 $router->group(['middleware' => 'auth'], function () use ($router) {
 
 	// ANY USER: User information
-  $router->post('/login','LoginController@login'); //login on Aria-based website
-	$router->post('/logout','LoginController@logout'); //logout (invalidates token)
 	$router->get('/user','LoginController@user'); //show user info
 	$router->get('/account','AccountController@show'); //get cygnus account
 
-	// ADMIN USER: News Editing
-	$router->post('/news','NewsController@store');
-	$router->put('/post/{news_id}', 'NewsController@update');
-	$router->delete('/post/{news_id}', 'NewsController@destroy');
+	// GM USER: Access Level >= 2
+	$router->post('/post','NewsController@store'); //Access Level > 3
+	$router->put('/post/{news_id}', 'NewsController@update'); //Access Level > 3
+	$router->delete('/post/{news_id}', 'NewsController@destroy'); //
+	
+	// ADMIN USER: Access Level >= 3
+	$router->post('/ban','AccountController@ban'); //Ban User
+	$router->post('/account','AccountController@store'); //Alter cygnus account
 
-	// CENTER USER
+	// CENTER/SYSTEM USER: Access Level == 5
 	$router->post('/server','ServerController@set'); //Post Server Information
 	$router->post('/ranking', 'RankingController@store'); //Post Avatar/Ranking data
-	$router->post('/ban','AccountController@ban'); //Ban User
 	$router->get('/blocklist','ServerController@blocklist'); //Get blocklist
-	$router->post('/account','AccountController@store'); //alter cygnus account
 
 });
 

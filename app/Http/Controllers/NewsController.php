@@ -1,4 +1,22 @@
 <?php
+/*
+	This file is a part of the Cygnus API, a RESTful Lumen based API.
+    Copyright (C) 2018 Kaz Voeten
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 namespace App\Http\Controllers;
 
 use App\News;
@@ -39,11 +57,18 @@ class NewsController extends Controller {
 
 	public function store(Request $request) {
 		$this->validateRequest($request);
+		
+		//Simplified access authorization
+		if(!$request->user()->access_level >= 2) {
+			return $this->error("Unauthorized.", 401);
+		}
+		
 		$post = Post::create([
 					'title' => $request->get('title'),
 					'content'=> $request->get('content'),
 					'author' => $this->getUserId()
 				]);
+		
 		return $this->success("The post with with id {$post->id} has been created", 201);
 	}
 
@@ -58,6 +83,11 @@ class NewsController extends Controller {
 	}
 
 	public function update(Request $request, $id){
+		//Simplified access authorization
+		if(!$request->user()->access_level >= 2) {
+			return $this->error("Unauthorized.", 401);
+		}
+		
 		$post = Post::find($id);
 
 		if(!$post){
@@ -73,6 +103,11 @@ class NewsController extends Controller {
 	}
 
 	public function destroy($id) {
+		//Simplified access authorization
+		if(!$request->user()->access_level >= 2) {
+			return $this->error("Unauthorized.", 401);
+		}
+		
 		$post = Post::find($id);
 
 		if(!$post){
@@ -90,11 +125,5 @@ class NewsController extends Controller {
 			'author' => 'required',
 		];
 		$this->validate($request, $rules);
-	}
-
-	public function isAuthorized(Request $request) {
-		$resource = "posts";
-		$post     = News::find($this->getArgs($request)["post_id"]);
-		return $this->authorizeUser($request, $resource, $post);
 	}
 }

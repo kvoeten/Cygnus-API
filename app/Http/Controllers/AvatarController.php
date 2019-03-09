@@ -12,7 +12,15 @@ class AvatarController extends Controller {
 	}
 
 	public function show($name) {
-		
+		/*
+		+--------------------------------------------------------+
+		|                   Made by HoltHelper                   |
+		|                                                        |
+		| Please give proper credits when using this code since  |
+		| It took me over a couple of months to finish this code |
+		|                                                        |
+		+--------------------------------------------------------+
+		*/
 		$path = "../resources/avatar/characters/".$name.".png";
 		$debug = false;
 		$Image = new ImageController($debug);

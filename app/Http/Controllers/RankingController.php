@@ -1,4 +1,22 @@
 <?php
+/*
+	This file is a part of the Cygnus API, a RESTful Lumen based API.
+    Copyright (C) 2018 Kaz Voeten
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 namespace App\Http\Controllers;
 
 use App\Rankings;
@@ -11,11 +29,10 @@ class RankingController extends Controller {
 		//Can add auth middleware here i guess
 	}
 
-	//Requires user ID < 100, which is reserved for system/admin.
 	public function store(Request $request) {
-
-		if($request->user()->id > 100) {
-			return $this->error(["Unauthorized"], 404);
+		//Simplified access authorization
+		if(!$request->user()->access_level >= 5) {
+			return $this->error("Unauthorized.", 401);
 		}
 
 		$activation = DB::table('avatar')->truncate();
@@ -46,7 +63,7 @@ class RankingController extends Controller {
 	}
 
 	public function show() {
-		$avatars = DB::table('avatar')->get();
+		$avatars = DB::table('avatar')->limit(5)->get();
 		return $this->success($avatars, 200);
 	}
 }

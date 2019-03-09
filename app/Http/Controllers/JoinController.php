@@ -1,7 +1,26 @@
 <?php
+/*
+	This file is a part of the Cygnus API, a RESTful Lumen based API.
+    Copyright (C) 2018 Kaz Voeten
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 namespace App\Http\Controllers;
 
 use App\User;
+use Carbon\Carbon;
 use App\Activation;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
@@ -20,65 +39,84 @@ class JoinController extends Controller {
 		$email = $request->get('email');
 
 		$client = new Client();
-    $response = $client->post(
-        'https://www.google.com/recaptcha/api/siteverify',
-        ['form_params'=>
-            [
-                'secret'=> env('CAPTCHA_SECRET', null),
-                'response'=>$request->get('g-recaptcha-response')
-             ]
-        ]
-    );
+		$response = $client->post(
+			'https://www.google.com/recaptcha/api/siteverify',
+			['form_params'=>
+				[
+					'secret'=> env('CAPTCHA_SECRET', null),
+					'response'=>$request->get('g-recaptcha-response')
+				 ]
+			]
+		);
 
 		$body = json_decode((string)$response->getBody());
 
 		if (!$body->success) {
-			return $this->error("Improper Captcha Response.", 200);
+			return $this->error("Improper Captcha Response.", 400);
 		}
 
 		if (strlen($request->get('name')) < 3) {
-			return $this->error("The provided name is too short. (At least three characters required.)", 200);
+			return $this->error("The provided name is too short. (At least three characters required.)", 400);
 		}
 
 		if (strlen($request->get('name')) > 40) {
-			return $this->error("The provided name is too long. (At max. fourty characters are allowed.)", 200);
+			return $this->error("The provided name is too long. (At max. fourty characters are allowed.)", 400);
 		}
 
 		if (User::where('email', '=', $email)->exists()) {
-		    return $this->error("The provided email adress is already registered.", 200);
+		    return $this->error("The provided email adress is already registered.", 400);
 		}
 
 		if (User::where('name', '=', $request->get('name'))->exists()) {
-		    return $this->error("That name is already taken.", 200);
+		    return $this->error("That name is already taken.", 400);
 		}
 
 		if ($password != $request->get('password_confirmation')) {
-			return $this->error("The provided passwords don't match.", 200);
+			return $this->error("The provided passwords don't match.", 400);
+		}
+		
+		if (!checkdate($request->get('month')), $request->get('day')), $request->get('year')))) {
+			return $this->error("Invalid birthday.", 400);
+		}
+		
+		if (request->get('gender') < 0 || request->get('gender') > 2) {
+			return $this->error("Invalid gender.", 400);
 		}
 
 		$user = User::create([
-					'name' => $request->get('name'),
-					'email' => $email,
-					'password' => Hash::make($password),
-				]);
+			'name' => $request->get('name'),
+			'email' => $email,
+			'password' => Hash::make($password),
+		]);
 
 		$token = str_random(60);
 		$activation = Activation::create([
-				'email' => $email,
-				'activation_key' => $token
-			]);
+			'email' => $email,
+			'activation_key' => $token
+		]);
+		
+		$birthdate = "".$request->get('year')."-".$request->get('month'))."-".$request->get('day'))." 00:00:00";
+		DB::insert('insert into accounts (nAccountID, nGender, pBirthDate) values (?, ?, ?)', 
+			[$user->id, request->get('gender'), $birthdate]);
 
-		Mail::send('emails.email', ['title_image' => "welcome.png", 'content' => "The Cygnus teams welcomes you! We only ask you to verify your email before continuing.", 'button_url' => 'https://api.maplecygnus.com/verify?token='.$token, 'button_text' => 'Verify Account!'], function ($message) use ($email)
-        {
-            $message->from('accounts@maplecygnus.com', 'Maple Cygnus');
-            $message->to($email);
-						$message->subject('Verify your Cygnus account.');
-        });
+		Mail::send(
+			'emails.email', 
+			['title_image' => "welcome.png", 
+			'content' => "The Cygnus teams welcomes you! We only ask you to verify your email before continuing.", 
+			'button_url' => 'https://api.maplecygnus.com/verify?token='.$token, 
+			'button_text' => 'Verify Account!'], 
+			function ($message) use ($email)
+			{
+				$message->from('accounts@maplecygnus.com', 'Maple Cygnus');
+				$message->to($email);
+				$message->subject('Verify your Cygnus account.');
+			}
+		);
 
 		if ($user) {
 			return $this->success($user, 200);
 		} else {
-			return $this->error("An unknown error occured.", 404);
+			return $this->error("An unknown error occured.", 422);
 		}
 	}
 
@@ -88,6 +126,10 @@ class JoinController extends Controller {
 			'email' => 'required',
 			'password' => 'required',
 			'password_confirmation' => 'required',
+			'month' => 'required',
+			'day' => 'required',
+			'year' => 'required',
+			'gender' => 'required',
 			'g-recaptcha-response' => 'required'
 		];
 		$this->validate($request, $rules);
