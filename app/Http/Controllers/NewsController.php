@@ -59,13 +59,14 @@ class NewsController extends Controller {
 		$this->validateRequest($request);
 		
 		//Simplified access authorization
-		if(!$request->user()->access_level >= 2) {
+		if($request->user()->access_level < 2) {
 			return $this->error("Unauthorized.", 401);
 		}
 		
 		$post = Post::create([
 					'title' => $request->get('title'),
 					'content'=> $request->get('content'),
+					'type' => $request->get('type'),
 					'author' => $this->getUserId()
 				]);
 		
@@ -84,34 +85,34 @@ class NewsController extends Controller {
 
 	public function update(Request $request, $id){
 		//Simplified access authorization
-		if(!$request->user()->access_level >= 2) {
+		if($request->user()->access_level < 2) {
 			return $this->error("Unauthorized.", 401);
 		}
 		
-		$post = Post::find($id);
+		$post = News::find($id);
 
 		if(!$post){
-			return $this->error("The post with {$id} doesn't exist", 404);
+			return $this->error("The post with id {$id} doesn't exist", 404);
 		}
 
 		$this->validateRequest($request);
-		$post->title 		  = $request->get('title');
+		$post->title 		= $request->get('title');
 		$post->content 		= $request->get('content');
-		$post->author 		= $request->get('author');
+		$post->type 		= $request->get('type');
 		$post->save();
 		return $this->success("The post with with id {$post->id} has been updated", 200);
 	}
 
 	public function destroy($id) {
 		//Simplified access authorization
-		if(!$request->user()->access_level >= 2) {
+		if($request->user()->access_level < 2) {
 			return $this->error("Unauthorized.", 401);
 		}
 		
-		$post = Post::find($id);
+		$post = News::find($id);
 
 		if(!$post){
-			return $this->error("The post with {$id} doesn't exist", 404);
+			return $this->error("The post with id {$id} doesn't exist", 404);
 		}
 
 		$post->delete();
@@ -122,7 +123,7 @@ class NewsController extends Controller {
 		$rules = [
 			'title' => 'required',
 			'content' => 'required',
-			'author' => 'required',
+			'type' => 'required',
 		];
 		$this->validate($request, $rules);
 	}
