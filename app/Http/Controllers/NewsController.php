@@ -77,7 +77,7 @@ class NewsController extends Controller {
 		$post = News::find($id);
 
 		if(!$post){
-			return $this->error("The news entry with {$id} doesn't exist", 404);
+			return $this->error("The news entry with {$id} doesn't exist", 200);
 		}
 
 		return $this->success($post, 200);
@@ -92,7 +92,7 @@ class NewsController extends Controller {
 		$post = News::find($id);
 
 		if(!$post){
-			return $this->error("The post with id {$id} doesn't exist", 404);
+			return $this->error("The post with id {$id} doesn't exist", 200);
 		}
 
 		$this->validateRequest($request);
@@ -103,7 +103,7 @@ class NewsController extends Controller {
 		return $this->success("The post with with id {$post->id} has been updated", 200);
 	}
 
-	public function destroy($id) {
+	public function destroy(Request $request, $id) {
 		//Simplified access authorization
 		if($request->user()->access_level < 2) {
 			return $this->error("Unauthorized.", 401);
@@ -112,7 +112,7 @@ class NewsController extends Controller {
 		$post = News::find($id);
 
 		if(!$post){
-			return $this->error("The post with id {$id} doesn't exist", 404);
+			return $this->error("The post with id {$id} doesn't exist", 200);
 		}
 
 		$post->delete();
