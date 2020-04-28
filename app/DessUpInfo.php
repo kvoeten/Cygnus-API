@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
 	This file is a part of the Cygnus API, a RESTful Lumen based API.
     Copyright (C) 2018 Kaz Voeten
@@ -21,7 +21,25 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Activation extends Model {
-	public $timestamps = false;
-    protected $fillable = ['email', 'activation_key'];
+class DressUpInfo extends Model
+{
+    protected $table = 'character_dress';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'dwCharacterID', 'nFace', 'nHair',
+        'nClothes', 'nSkin', 'nMixBaseHairColor',
+        'nMixAddHairColor', 'nMixHairBaseProb'
+    ];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [];	
 }

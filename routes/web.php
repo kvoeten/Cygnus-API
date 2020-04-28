@@ -29,7 +29,7 @@
 */
 
 $router->get('/', function () use ($router) {
-    return 'Cygnus API powered by: '.$router->app->version();
+    return 'API powered by Lumen '.$router->app->version();
 });
 
 /*
@@ -38,22 +38,24 @@ $router->get('/', function () use ($router) {
 $router->group(['middleware' => 'auth'], function () use ($router) {
 
 	// ANY USER: User information
-	$router->get('/user','LoginController@user'); //show user info
-	$router->get('/account','AccountController@show'); //get cygnus account
+	$router->get('/user','UserController@get'); // Show user info
+	$router->get('/account','AccountController@get'); // Show account info
 
 	// GM USER: Access Level >= 2
-	$router->post('/post','NewsController@store'); //Access Level > 3
-	$router->put('/post/{news_id}', 'NewsController@update'); //Access Level > 3
+	$router->post('/post','NewsController@store'); // Access Level > 3
+	$router->put('/post/{news_id}', 'NewsController@update'); // Access Level > 3
 	$router->delete('/post/{news_id}', 'NewsController@destroy'); //
 	
 	// ADMIN USER: Access Level >= 3
-	$router->post('/ban','AccountController@ban'); //Ban User
-	$router->post('/account','AccountController@store'); //Alter cygnus account
+	$router->post('/ban','AccountController@ban'); // Ban User
+	$router->post('/account','AccountController@store'); // Alter cygnus account
 
 	// CENTER/SYSTEM USER: Access Level == 5
-	$router->post('/server','ServerController@set'); //Post Server Information
-	$router->post('/ranking', 'RankingController@store'); //Post Avatar/Ranking data
-	$router->get('/blocklist','ServerController@blocklist'); //Get blocklist
+	$router->post('/server','ServerController@set'); // Post Server Information
+	$router->post('/ranking', 'RankingController@store'); // Post Avatar/Ranking data
+	$router->get('/blocklist','ServerController@blocklist'); // Get blocklist
+	$router->post('/avatar', 'AvatarController@create'); // Create or update avatar
+	$router->put('/avatar/{id}', 'AvatarController@update'); // Update avatar info
 
 });
 
@@ -62,8 +64,9 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 */
 
 // Get Avatar/Ranking information
+$router->get('/avatar/{id}', 'AvatarController@get');
+$router->get('/avatar/image/{id}', 'AvatarController@image');
 $router->get('/ranking', 'RankingController@show');
-$router->get('/avatar/{name}', 'AvatarController@show');
 
 // Get Server Information
 $router->get('/server','ServerController@get');
@@ -78,8 +81,7 @@ $router->get('/news/{page_id}','NewsController@page');
 $router->get('/post/{news_id}','NewsController@show');
 
 // User Creation
-$router->post('/join','JoinController@store');
-$router->get('/verify','LoginController@verify');
+$router->post('/join','JoinController@join');
 
 // Wz Endpoints
 $router->get('/map/{id}','WzController@map');

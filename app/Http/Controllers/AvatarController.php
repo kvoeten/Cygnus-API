@@ -11,7 +11,25 @@ class AvatarController extends Controller {
 		//Can add auth middleware here i guess
 	}
 
-	public function show($name) {
+	public function create($Request) {
+		$rules = [
+			'title' => 'required',
+			'content' => 'required',
+			'type' => 'required',
+		];
+		$this->validate($request, $rules);
+	}
+
+	public function get($id) {
+		$AvatarData = AvatarData::find($id);
+		if ($AvatarData) {
+			$this->success($AvatarData.getAllData(), 201);
+		} else {
+			$this->success("Avatar not found.", 404);
+		}
+	}
+
+	public function image($id) {
 		/*
 		+--------------------------------------------------------+
 		|                   Made by HoltHelper                   |
@@ -21,15 +39,22 @@ class AvatarController extends Controller {
 		|                                                        |
 		+--------------------------------------------------------+
 		*/
-		$path = "../resources/avatar/characters/".$name.".png";
+		$path = '../resources/avatar/characters/'.$id.'.png';
 		$debug = false;
-		$Image = new ImageController($debug);
+		$Image = new AvatarRender($debug);
 		
 		if(!file_exists($path) || $debug) {
-			if($character = DB::table('avatar')->where('sCharacterName', $name)->first()) {
-				$inventory = DB::table('avatarequip')->where('dwCharacterID', $character->dwCharacterID)->orderBy('nPos')->get();
-				
-				$variables = array("debug" => (bool)$debug, "gender" => $character->nGender, "job" => $character->nJob, "skin" => $character->nSkin, "hair" => $character->nHair, "face" => $character->nFace);
+			if($AvatarLook = AvatarData::find($id)) {
+
+				$inventory = $AvatarLook->anEquip;
+				$variables = array(
+					"debug" => (bool)$debug, 
+					"gender" => $AvatarLook->nGender, 
+					"job" => $AvatarLook->nJob, 
+					"skin" => $AvatarLook->nSkin, 
+					"hair" => $AvatarLook->nHair, 
+					"face" => $AvatarLook->nFace
+				);
 
 				foreach($inventory as $item) {
 					switch($item->nPos) {

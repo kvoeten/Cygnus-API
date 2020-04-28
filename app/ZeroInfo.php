@@ -17,22 +17,31 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-namespace App\Http\Controllers;
+namespace App;
 
-use App\User;
-use App\Activation;
-use DateTime;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Database\Eloquent\Model;
 
-class LoginController extends Controller {
+class WildHunterInfo extends Model
+{
+    protected $table = 'character_zero';
 
-	public function __construct() {}
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'dwCharacterID', 'nSubHP', 'nSubMP', 'nSubSkin',
+        'nSubHair', 'nSubFace', 'nSubMHP', 'nSubMMP',
+        'dbCharZeroLinkCashPart', 'nMixBaseHairColor',
+        'nMixAddHairColor', 'nMixHairBaseProb',
+        'bIsBeta', 'nLapis', 'nLazuli'
+    ];
 
-	//Only Accessible with token.
-	public function user(Request $request) {
-		return $request->user();
-	}
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [];	
 }

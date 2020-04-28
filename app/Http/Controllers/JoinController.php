@@ -35,10 +35,15 @@ class JoinController extends Controller {
 		//Can add auth middleware here i guess
 	}
 
-	public function store(Request $request) {
+	/**
+	 * Handles user registration
+	 */
+	public function join(Request $request) {
+
+		// Validate Request
 		$validator = Validator::make(request()->all(), [
 			'name' => 'required|unique:users,name|between:3,30',
-			'email' => 'required|email|unique:users,email',
+			'code' => 'required|string',
 			'password' => 'required|confirmed|between:6,64',
 			'birthday' => 'required|date',
 			'gender' => 'required|integer|max:3',
@@ -49,6 +54,7 @@ class JoinController extends Controller {
         	return $this->error($validator->errors()->first(), 200);
         }
 
+		// Check Captcha 
 		$client = new Client();
 		$response = $client->post(
 			'https://www.google.com/recaptcha/api/siteverify',
@@ -65,22 +71,76 @@ class JoinController extends Controller {
 		if (!$body->success) {
 			return $this->error("Improper Captcha Response.", 200);
 		}
-
-		$user = User::create([
-			'name' => $request->get('name'),
-			'email' => $request->get('email'),
-			'password' => Hash::make($password),
-		]);
 		
-		DB::insert(
-			'insert into accounts (nAccountID, nGender, pBirthDate) values (?, ?, ?)', 
-			[$user->id, $request->get('gender'), $request->get('birthday')
-		);
-
-		if ($user) {
-			return $this->success($user, 200);
-		} else {
-			return $this->error("An unknown error occured.", 422);
+		// Get user info from Discord and create user
+		$discordUser = null;
+		try {
+			$auth = $this->getDiscordAuth($code);
+			if ($auth['access_token']) {
+				$token = $auth['access_token'];
+				$expires = $auth['expires_in'];
+				$user = $this->getDiscordUser($token);
+				if ($user['id']) {
+					if (!$user['verified']) {
+						return $this->error('The provided discord account is not verified.', 200);
+					}
+					$result = User::create([
+						'name' => $request->get('name'),
+						'email' => $user['email'],
+						'discord' => $user['id'],
+						'password' => Hash::make($password),
+						'gender' => $request->get('gender'), 
+						'birthday' => $request->get('birthday')
+					]);
+			
+					if ($result) {
+						return $this->success($user, 200);
+					} else {
+						return $this->error("Unable to create user.", 422);
+					}
+				} else {
+					return $this->error('Unable to obtain user information. Is discord available?', 200);
+				}
+			} else {
+				return $this->error('Code exchange failed. No discord authorization token was obtained.', 200);
+			}
+		} catch (Exception $error) {
+			return $this->error('An unknown error has occured.', 200);
 		}
+	}
+	
+	/**
+	 * Retrieve discord authorization
+	 */
+	public function getDiscordAuth($code) {
+		$client = new Client();
+		$response = $client->request('POST', 'https://discordapp.com/api/oauth2/token', [
+			'headers' => [
+                'content-type' => 'application/x-www-form-urlencoded',
+            ],						 
+		    'form_params' => [
+				'grant_type' => 'authorization_code',
+				'client_id' => '652970958742618112',
+				'client_secret' => 'UzYKZRk0jobB3Y-lljyvJjdvF2LApyww',
+				'redirect_uri' => 'https://api.skycastlems.com/verify',
+				'code' => $code,
+				'scope' => 'identify email'
+			]
+	    ]);
+		return json_decode($response->getBody()->getContents(), true);
+	}
+
+	/**
+	 * Attempts to get user information from discord with a given token
+	 */
+	public function getDiscordUser($token) {
+		$client = new Client();
+		$response = $client->request('GET', 'https://discordapp.com/api/users/@me', [
+			'headers' => [
+                'accept' => 'application/json',
+				'authorization' => 'Bearer '.$token
+            ]
+	    ]);
+		return json_decode($response->getBody()->getContents(), true);
 	}
 }

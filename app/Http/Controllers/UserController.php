@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
 	This file is a part of the Cygnus API, a RESTful Lumen based API.
     Copyright (C) 2018 Kaz Voeten
@@ -17,12 +17,22 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-namespace App;
+namespace App\Http\Controllers;
 
-use Illuminate\Database\Eloquent\Model;
+use App\User;
+use App\Activation;
+use DateTime;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
-class News extends Model {
-    protected $fillable = [
-        'id', 'author', 'title', 'category', 'description', 'content', 'views', 'created_at', 'updated_at'
-    ];
+class UserController extends Controller {
+
+	public function __construct() {}
+
+	//Only Accessible with token.
+	public function get(Request $request) {
+		return $request->user();
+	}
 }

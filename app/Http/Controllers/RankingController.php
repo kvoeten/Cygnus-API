@@ -38,8 +38,8 @@ class RankingController extends Controller {
 		$data = json_decode($request->getContent());
 		if (count($data)) {
 			foreach($data as $avatar) {
-				DB::table('avatar')->where("dwCharacterID", dwCharacterID)->truncate();
-				DB::table('avatarequip')->where("dwCharacterID", dwCharacterID)->truncate();
+				DB::table('avatar')->where("dwCharacterID", dwCharacterID)->delete();
+				DB::table('avatarequip')->where("dwCharacterID", dwCharacterID)->delete();
 				DB::insert('insert into avatar (dwCharacterID, nAccountID, nWorld, nOverallRank, nOverallRankMove, nRank, nRankMove, nLevel, nJob, nExp64, nPop, nGender, nSkin, nHair, nFace, sCharacterName) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [$avatar->dwCharacterID, $avatar->nAccountID, $avatar->nWorld, $avatar->nOverallRank, $avatar->nOverallRankMove, $avatar->nRank, $avatar->nRankMove, $avatar->nLevel, $avatar->nJob, $avatar->nExp64, $avatar->nPop, $avatar->nGender, $avatar->nSkin, $avatar->nHair, $avatar->nFace, $avatar->sCharacterName]);
 
 				$equips = $avatar->aBody;
@@ -48,15 +48,15 @@ class RankingController extends Controller {
 						DB::insert('insert into avatarequip (dwCharacterID, nPos, nItemId) values (?, ?, ?)', [$avatar->dwCharacterID, $item->nPos, $item->nItemID]);
 					}
 				}
-			}
-		}
 
-		//truncate generated images
-		$path = '../resources/avatar/characters/*';
-		$files = glob($path);
-		foreach($files as $file){
-		  if(is_file($file))
-			unlink($file);
+				// Remove cached image
+				$path = '../resources/avatar/characters/'.$avatar->nWorld.'/'.$avatar->dwCharacterID.'.png';
+				$files = glob($path);
+				foreach($files as $file){
+				if(is_file($file))
+					unlink($file);
+				}
+			}
 		}
 
 		return $this->success("Ranking entries have been created.", 201);

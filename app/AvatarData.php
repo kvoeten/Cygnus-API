@@ -19,17 +19,11 @@
 
 namespace App;
 
-use Laravel\Passport\HasApiTokens;
-use Laravel\Lumen\Auth\Authorizable;
-use Illuminate\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
-use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 
-class User extends Model implements AuthenticatableContract, AuthorizableContract
+class AvatarData extends Model
 {
-    use HasApiTokens, Authenticatable, Authorizable, Notifiable;
+    protected $table = 'avatar_data';
 
     /**
      * The attributes that are mass assignable.
@@ -37,7 +31,8 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'gradecode', 'discord'
+        'dwCharacterID','nAccountID', 'nWorld', 'nCharListPos', 'nRank',
+        'nRankMove', 'nOverallRank', 'nOverallRankMove'
     ];
 
     /**
@@ -45,26 +40,21 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      *
      * @var array
      */
-    protected $hidden = [
-        'password', 'remember_token',
-    ];
-	
-	/**
-	* Get user by email.
+    protected $hidden = [];	
+
+    /**
+	* Get all child data.
 	*
 	* @var user email
 	*/
-	public function getUser($email){
-		return $user = (new User)->where('email', $email)->first();
+	public function getAllData() {
+		return array(
+            'AvatarData' => $this,
+            'AvatarLook' => (new AvatarLook)->where('dwCharacterID', $this->dwCharacterID)->first(),
+            'CharacterStat' => (new CharacterStat)->where('dwCharacterID', $this->dwCharacterID)->first(),
+            'DressUpInfo' => (new DressUpInfo)->where('dwCharacterID', $this->dwCharacterID)->first(),
+            'WildHunterInfo' => (new WildHunterInfo)->where('dwCharacterID', $this->dwCharacterID)->first(),
+            'ZeroInfo' => (new ZeroInfo)->where('dwCharacterID', $this->dwCharacterID)->first()
+        );
 	}
-	
-	/**
-	* Makes oauth/login requests work with both name and email.
-	*
-	* @var user's name or email
-	*/
-	public function findForPassport($username){
-		return $user = (new User)->where('email', $username)->orWhere('name', $username)->first();
-	}
-	
 }

@@ -26,19 +26,14 @@ class NewsController extends Controller {
 
 	public function __construct() {}
 
-	public function index() {
-		$posts = News::all();
-		return $this->success($posts, 200);
-	}
-
 	public function page($page = 1) {
-		$news = News::all();
+		$news = News::orderBy('created_at', 'desc')->get();
 
 		if (sizeof($news) < 1) {
 			return $this->error("There aren't any news articles.", 404);
 		}
 
-		$posts = array_chunk($news->toArray(), 5);
+		$posts = array_chunk($news->toArray(), 10);
 		$pages = sizeof($posts);
 
 		if ($page > $pages) {

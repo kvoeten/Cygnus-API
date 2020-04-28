@@ -10,7 +10,7 @@
 */
 namespace App\Http\Controllers;
 
-class ImageController {
+class AvatarRender {
 
     public $stand = 1;
     private $debug;

@@ -40,7 +40,6 @@ class ServerController extends Controller {
 		//TODO: handle setting new values.
 	}
 	
-	
  	//Linux only. 0 if alive, 1 if dead.
     public function aliveCheck($ip) {
     	$pingresult = exec("/bin/ping -n 3 $ip", $outcome, $status);
