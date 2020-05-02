@@ -21,9 +21,10 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class WildHunterInfo extends Model
+class ZeroInfo extends Model
 {
     protected $table = 'character_zero';
+    protected $primaryKey = 'dwCharacterID';
 
     /**
      * The attributes that are mass assignable.

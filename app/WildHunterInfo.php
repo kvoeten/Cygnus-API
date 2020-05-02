@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Model;
 class WildHunterInfo extends Model
 {
     protected $table = 'character_hunter';
+    protected $primaryKey = 'dwCharacterID';
 
     /**
      * The attributes that are mass assignable.

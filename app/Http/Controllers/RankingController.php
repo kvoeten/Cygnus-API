@@ -19,7 +19,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Rankings;
+use App\AvatarData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -29,41 +29,34 @@ class RankingController extends Controller {
 		//Can add auth middleware here i guess
 	}
 
-	public function store(Request $request) {
-		//Simplified access authorization
-		if(!$request->user()->access_level >= 5) {
-			return $this->error("Unauthorized.", 401);
+	public function page($page = 1) {
+		$avatars = AvatarData::orderBy('nOverallRank', 'desc')->get();
+	
+		if (sizeof($avatars) < 1) {
+			return $this->error("There aren't any characters.", 404);
+		}
+	
+		$entries = array_chunk($avatars->toArray(), 10);
+		$pages = sizeof($entries);
+	
+		if ($page > $pages) {
+			return $this->error("Invalid ranking page.", 404);
 		}
 
-		$data = json_decode($request->getContent());
-		if (count($data)) {
-			foreach($data as $avatar) {
-				DB::table('avatar')->where("dwCharacterID", dwCharacterID)->delete();
-				DB::table('avatarequip')->where("dwCharacterID", dwCharacterID)->delete();
-				DB::insert('insert into avatar (dwCharacterID, nAccountID, nWorld, nOverallRank, nOverallRankMove, nRank, nRankMove, nLevel, nJob, nExp64, nPop, nGender, nSkin, nHair, nFace, sCharacterName) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [$avatar->dwCharacterID, $avatar->nAccountID, $avatar->nWorld, $avatar->nOverallRank, $avatar->nOverallRankMove, $avatar->nRank, $avatar->nRankMove, $avatar->nLevel, $avatar->nJob, $avatar->nExp64, $avatar->nPop, $avatar->nGender, $avatar->nSkin, $avatar->nHair, $avatar->nFace, $avatar->sCharacterName]);
-
-				$equips = $avatar->aBody;
-				if (count($equips)) {
-					foreach($equips as $item) {
-						DB::insert('insert into avatarequip (dwCharacterID, nPos, nItemId) values (?, ?, ?)', [$avatar->dwCharacterID, $item->nPos, $item->nItemID]);
-					}
-				}
-
-				// Remove cached image
-				$path = '../resources/avatar/characters/'.$avatar->nWorld.'/'.$avatar->dwCharacterID.'.png';
-				$files = glob($path);
-				foreach($files as $file){
-				if(is_file($file))
-					unlink($file);
-				}
-			}
+		$data = [];
+		foreach ($entries[$page - 1] as $avatar) {
+			$avatardata = AvatarData::find($avatar['dwCharacterID']);
+			$avatardata->CharacterStat; // Load stats onto avatar object
+			array_push($data, $avatardata);
 		}
-
-		return $this->success("Ranking entries have been created.", 201);
-	}
-
-	public function show() {
-		$avatars = DB::table('avatar')->limit(5)->get();
-		return $this->success($avatars, 200);
+	
+		return response()->json([
+			'success' => true,
+			'prev' => ($page - 1 > 0) ? ($page - 1) : 1,
+			'current' => $page,
+			'next' => ($page + 1 < $pages) ? ($page + 1) : $pages,
+			'last' => $pages,
+			'data' => $data
+		], 200);
 	}
 }

@@ -20,10 +20,13 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AvatarData extends Model
 {
     protected $table = 'avatar_data';
+    protected $primaryKey = 'dwCharacterID';
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -43,18 +46,42 @@ class AvatarData extends Model
     protected $hidden = [];	
 
     /**
-	* Get all child data.
-	*
-	* @var user email
-	*/
-	public function getAllData() {
-		return array(
-            'AvatarData' => $this,
-            'AvatarLook' => (new AvatarLook)->where('dwCharacterID', $this->dwCharacterID)->first(),
-            'CharacterStat' => (new CharacterStat)->where('dwCharacterID', $this->dwCharacterID)->first(),
-            'DressUpInfo' => (new DressUpInfo)->where('dwCharacterID', $this->dwCharacterID)->first(),
-            'WildHunterInfo' => (new WildHunterInfo)->where('dwCharacterID', $this->dwCharacterID)->first(),
-            'ZeroInfo' => (new ZeroInfo)->where('dwCharacterID', $this->dwCharacterID)->first()
-        );
-	}
+     * Child data fetchable through matching primary key
+     */
+    public function AvatarLook()
+    {
+        return $this->hasOne('App\AvatarLook', 'dwCharacterID');
+    }
+
+    /**
+     * Child data fetchable through matching primary key
+     */
+    public function CharacterStat()
+    {
+        return $this->hasOne('App\CharacterStat', 'dwCharacterID');
+    }
+
+    /**
+     * Child data fetchable through matching primary key
+     */
+    public function DressUpInfo()
+    {
+        return $this->hasOne('App\DressUpInfo', 'dwCharacterID');
+    }
+
+    /**
+     * Child data fetchable through matching primary key
+     */
+    public function WildHunterInfo()
+    {
+        return $this->hasOne('App\WildHunterInfo', 'dwCharacterID');
+    }
+
+    /**
+     * Child data fetchable through matching primary key
+     */
+    public function ZeroInfo()
+    {
+        return $this->hasOne('App\ZeroInfo', 'dwCharacterID');
+    }
 }

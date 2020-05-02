@@ -18,8 +18,9 @@ class CreateUsersTable extends Migration
             $table->string('email')->unique();
             $table->string('discord')->unique();
             $table->string('password');
-            $table->string('pic');
             $table->smallInteger('gradecode')->default(0);
+            $table->string('icon');
+            $table->date('birthday');
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
             $table->softDeletes('deleted_at', 0);

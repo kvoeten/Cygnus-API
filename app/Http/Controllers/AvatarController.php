@@ -1,6 +1,8 @@
 <?php 
 namespace App\Http\Controllers;
 
+use App\AvatarData;
+use App\AvatarLook;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -23,9 +25,14 @@ class AvatarController extends Controller {
 	public function get($id) {
 		$AvatarData = AvatarData::find($id);
 		if ($AvatarData) {
-			$this->success($AvatarData.getAllData(), 201);
+			$AvatarData->AvatarLook;
+			$AvatarData->CharacterStat;
+			$AvatarData->DressUpInfo;
+			$AvatarData->WildHunterInfo;
+			$AvatarData->ZeroInfo;
+			return $this->success($AvatarData, 201);
 		} else {
-			$this->success("Avatar not found.", 404);
+			return $this->error("Avatar not found.", 404);
 		}
 	}
 
@@ -44,9 +51,9 @@ class AvatarController extends Controller {
 		$Image = new AvatarRender($debug);
 		
 		if(!file_exists($path) || $debug) {
-			if($AvatarLook = AvatarData::find($id)) {
+			if($AvatarLook = AvatarLook::find($id)) {
 
-				$inventory = $AvatarLook->anEquip;
+				$inventory = $AvatarLook->anEquip->anHairEquip;
 				$variables = array(
 					"debug" => (bool)$debug, 
 					"gender" => $AvatarLook->nGender, 

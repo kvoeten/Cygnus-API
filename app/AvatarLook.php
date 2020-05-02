@@ -24,6 +24,10 @@ use Illuminate\Database\Eloquent\Model;
 class AvatarLook extends Model
 {
     protected $table = 'avatar_look';
+    protected $primaryKey = 'dwCharacterID';
+    protected $casts = [
+        'anEquip' => 'array'
+    ];
 
     /**
      * The attributes that are mass assignable.

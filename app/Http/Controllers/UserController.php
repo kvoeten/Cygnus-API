@@ -20,6 +20,7 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use App\Account;
 use App\Activation;
 use DateTime;
 use Illuminate\Http\Request;
@@ -34,5 +35,9 @@ class UserController extends Controller {
 	//Only Accessible with token.
 	public function get(Request $request) {
 		return $request->user();
-	}
+    }
+    
+    public function getAccount(Request $request) {
+        return Account::find($request->user()->id)->first();
+    }
 }

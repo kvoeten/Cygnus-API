@@ -66,7 +66,10 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 // Get Avatar/Ranking information
 $router->get('/avatar/{id}', 'AvatarController@get');
 $router->get('/avatar/image/{id}', 'AvatarController@image');
-$router->get('/ranking', 'RankingController@show');
+
+// Get Ranking Info
+$router->get('/ranking', 'RankingController@page');
+$router->get('/ranking/{page}', 'RankingController@page');
 
 // Get Server Information
 $router->get('/server','ServerController@get');
@@ -75,13 +78,12 @@ $router->get('/server','ServerController@get');
 $router->get('/image/{name}','AssetController@show');
 
 // Get News
-$router->get('/news/all','NewsController@index');
 $router->get('/news','NewsController@page');
 $router->get('/news/{page_id}','NewsController@page');
 $router->get('/post/{news_id}','NewsController@show');
 
 // User Creation
-$router->post('/join','JoinController@join');
+$router->post('/register','RegisterController@register');
 
 // Wz Endpoints
 $router->get('/map/{id}','WzController@map');

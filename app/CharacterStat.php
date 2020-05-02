@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Model;
 class CharacterStat extends Model
 {
     protected $table = 'character_stat';
+    protected $primaryKey = 'dwCharacterID';
 
     /**
      * The attributes that are mass assignable.

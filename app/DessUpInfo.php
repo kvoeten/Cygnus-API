@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Model;
 class DressUpInfo extends Model
 {
     protected $table = 'character_dress';
+    protected $primaryKey = 'dwCharacterID';
 
     /**
      * The attributes that are mass assignable.
