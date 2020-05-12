@@ -35,7 +35,7 @@ class AvatarData extends Model
      */
     protected $fillable = [
         'dwCharacterID','nAccountID', 'nWorld', 'nCharListPos', 'nRank',
-        'nRankMove', 'nOverallRank', 'nOverallRankMove'
+        'nRankMove', 'nOverallRank', 'nOverallRankMove', 'sCategory'
     ];
 
     /**

@@ -33,10 +33,10 @@ class NewsController extends Controller {
 			return $this->error("There aren't any news articles.", 404);
 		}
 
-		$posts = array_chunk($news->toArray(), 10);
+		$posts = array_chunk($news->toArray(), 8);
 		$pages = sizeof($posts);
 
-		if ($page > $pages) {
+		if ($page > $pages || $page < 1) {
 			return $this->error("Invalid news page.", 404);
 		}
 
@@ -54,18 +54,23 @@ class NewsController extends Controller {
 		$this->validateRequest($request);
 		
 		//Simplified access authorization
-		if($request->user()->access_level < 2) {
+		if($request->user()->gradecode < 2) {
 			return $this->error("Unauthorized.", 401);
 		}
 		
 		$post = News::create([
-					'title' => $request->get('title'),
-					'content'=> $request->get('content'),
-					'type' => $request->get('type'),
-					'author' => $request->user()->name
-				]);
+			'title' => $request->get('title'),
+			'content'=> $request->get('content'),
+			'category' => $request->get('category'),
+			'description' => $request->get('description'),
+			'author' => $request->user()->name
+		]);
 		
-		return $this->success("The post with with id {$post->id} has been created", 201);
+		if ($post) {
+			return $this->success("The post with with id {$post->id} has been created", 201);
+		} else {
+			return $this->error("Unable to save post", 200);
+		}
 	}
 
 	public function show($id) {
@@ -80,7 +85,7 @@ class NewsController extends Controller {
 
 	public function update(Request $request, $id){
 		//Simplified access authorization
-		if($request->user()->access_level < 2) {
+		if($request->user()->gradecode < 2) {
 			return $this->error("Unauthorized.", 401);
 		}
 		
@@ -93,14 +98,14 @@ class NewsController extends Controller {
 		$this->validateRequest($request);
 		$post->title 		= $request->get('title');
 		$post->content 		= $request->get('content');
-		$post->type 		= $request->get('type');
+		$post->category		= $request->get('category');
 		$post->save();
 		return $this->success("The post with with id {$post->id} has been updated", 200);
 	}
 
 	public function destroy(Request $request, $id) {
 		//Simplified access authorization
-		if($request->user()->access_level < 2) {
+		if($request->user()->gradecode < 2) {
 			return $this->error("Unauthorized.", 401);
 		}
 		
@@ -117,8 +122,9 @@ class NewsController extends Controller {
 	public function validateRequest(Request $request) {
 		$rules = [
 			'title' => 'required',
+			'description' => 'required',
+			'category' => 'required',
 			'content' => 'required',
-			'type' => 'required',
 		];
 		$this->validate($request, $rules);
 	}

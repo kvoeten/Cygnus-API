@@ -42,9 +42,9 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 	$router->get('/account','AccountController@get'); // Show account info
 
 	// GM USER: Access Level >= 2
-	$router->post('/post','NewsController@store'); // Access Level > 3
-	$router->put('/post/{news_id}', 'NewsController@update'); // Access Level > 3
-	$router->delete('/post/{news_id}', 'NewsController@destroy'); //
+	$router->post('/article','NewsController@store'); // Access Level > 3
+	$router->put('/article/{news_id}', 'NewsController@update'); // Access Level > 3
+	$router->delete('/article/{news_id}', 'NewsController@destroy'); //
 	
 	// ADMIN USER: Access Level >= 3
 	$router->post('/ban','AccountController@ban'); // Ban User
@@ -68,8 +68,8 @@ $router->get('/avatar/{id}', 'AvatarController@get');
 $router->get('/avatar/image/{id}', 'AvatarController@image');
 
 // Get Ranking Info
-$router->get('/ranking', 'RankingController@page');
-$router->get('/ranking/{page}', 'RankingController@page');
+$router->get('/ranking', 'RankingController@find');
+$router->get('/ranking/top', 'RankingController@top');
 
 // Get Server Information
 $router->get('/server','ServerController@get');
@@ -79,8 +79,8 @@ $router->get('/image/{name}','AssetController@show');
 
 // Get News
 $router->get('/news','NewsController@page');
-$router->get('/news/{page_id}','NewsController@page');
-$router->get('/post/{news_id}','NewsController@show');
+$router->get('/news/{page}','NewsController@page');
+$router->get('/article/{article}','NewsController@show');
 
 // User Creation
 $router->post('/register','RegisterController@register');

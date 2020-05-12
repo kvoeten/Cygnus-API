@@ -29,18 +29,54 @@ class RankingController extends Controller {
 		//Can add auth middleware here i guess
 	}
 
-	public function page($page = 1) {
-		$avatars = AvatarData::orderBy('nOverallRank', 'desc')->get();
-	
+	public function validateRequest(Request $request) {
+		$rules = [
+			'page' => 'required|numeric|min:1',
+			'order' => 'required|string',
+			'category' => 'required|string',
+			'world' => 'required|numeric',
+		];
+		$this->validate($request, $rules);
+	}
+
+	public function top() {
+		$avatars = AvatarData::orderBy('nOverallRank', 'asc')->limit(3)->get();
 		if (sizeof($avatars) < 1) {
-			return $this->error("There aren't any characters.", 404);
+			return $this->error("No characters found matching provided query.", 200);
+		}
+		foreach ($avatars as $avatar) {
+			$avatar->CharacterStat; // Load stats onto avatar object
+		}
+		return $this->success($avatars, 200);
+	}
+
+	public function find(Request $request) {
+		$this->validateRequest($request);
+		
+		$world = $request->get('world');
+		$category = $request->get('category');
+		$order = $request->get('order');
+
+		if ($order != 'asc' && $order != 'dec') {
+			$order = 'asc';
+		}
+
+		if ($category != 'any') {
+			$avatars = AvatarData::where('nWorld', $world)->where('sCategory', $category)->orderBy('nRank', $order)->get();
+		} else {
+			$avatars = AvatarData::where('nWorld', $world)->orderBy('nOverallRank', $order)->get();
+		}
+
+		if (sizeof($avatars) < 1) {
+			return $this->error("No characters found matching provided query.", 200);
 		}
 	
-		$entries = array_chunk($avatars->toArray(), 10);
+		$page = $request->get('page');
+		$entries = array_chunk($avatars->toArray(), 5);
 		$pages = sizeof($entries);
 	
 		if ($page > $pages) {
-			return $this->error("Invalid ranking page.", 404);
+			return $this->error("Invalid ranking page.", 200);
 		}
 
 		$data = [];

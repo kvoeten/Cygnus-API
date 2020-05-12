@@ -53,7 +53,7 @@ class AvatarController extends Controller {
 		if(!file_exists($path) || $debug) {
 			if($AvatarLook = AvatarLook::find($id)) {
 
-				$inventory = $AvatarLook->anEquip->anHairEquip;
+				$inventory = $AvatarLook->anEquip['anHairEquip'];
 				$variables = array(
 					"debug" => (bool)$debug, 
 					"gender" => $AvatarLook->nGender, 
@@ -64,19 +64,19 @@ class AvatarController extends Controller {
 				);
 
 				foreach($inventory as $item) {
-					switch($item->nPos) {
-						case 1: case 101:$variables['cap']               = $item->nItemID;break;
-						case 2: case 102:$variables['accessory']['face'] = $item->nItemID;break;
-						case 3: case 103:$variables['accessory']['eyes'] = $item->nItemID;break;
-						case 4: case 104:$variables['accessory']['ears'] = $item->nItemID;break;
-						case 5: case 105:$variables['coat']              = $item->nItemID;break;
-						case 6: case 106:$variables['pants']             = $item->nItemID;break;
-						case 7: case 107:$variables['shoes']             = $item->nItemID;break;
-						case 8: case 108:$variables['glove']             = $item->nItemID;break;
-						case 9: case 109:$variables['cape']              = $item->nItemID;break;
-						case 10:case 110:$variables['shield']            = $item->nItemID;break;
-						case 11: $variables['weapon']['base']            = $item->nItemID;break;
-						case 111:$variables['weapon']['cash']            = $item->nItemID;break;
+					switch($item['nPos']) {
+						case 1: case 101:$variables['cap']               = $item['nItemID'];break;
+						case 2: case 102:$variables['accessory']['face'] = $item['nItemID'];break;
+						case 3: case 103:$variables['accessory']['eyes'] = $item['nItemID'];break;
+						case 4: case 104:$variables['accessory']['ears'] = $item['nItemID'];break;
+						case 5: case 105:$variables['coat']              = $item['nItemID'];break;
+						case 6: case 106:$variables['pants']             = $item['nItemID'];break;
+						case 7: case 107:$variables['shoes']             = $item['nItemID'];break;
+						case 8: case 108:$variables['glove']             = $item['nItemID'];break;
+						case 9: case 109:$variables['cape']              = $item['nItemID'];break;
+						case 10:case 110:$variables['shield']            = $item['nItemID'];break;
+						case 11: $variables['weapon']['base']            = $item['nItemID'];break;
+						case 111:$variables['weapon']['cash']            = $item['nItemID'];break;
 					}
 				}
 
@@ -180,12 +180,12 @@ class AvatarController extends Controller {
 				->accessory('ears', 'capOverHair')
 				->lv2('cape', 'capeOverWepon')
 				->lv2('cape', 'capOverHair')
-				->createImage($name);
+				->createImage($id);
 			} else {
 				$path = "../resources/avatar/base.png";
 			}
 		}
-			
+	
 		$headers = ['Content-Type' => 'image/png', 'Content-Disposition' => 'inline'];
 		$response = new BinaryFileResponse($path, 200, $headers);
     	BinaryFileResponse::trustXSendfileTypeHeader();       
