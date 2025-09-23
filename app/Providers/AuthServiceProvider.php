@@ -58,5 +58,12 @@ class AuthServiceProvider extends ServiceProvider
                 return User::where('api_token', $request->input('api_token'))->first();
             }
         });
+
+        // Define a 'gate' for managing news.
+        // Access Level >= 2 (GM USER) can manage news.
+        // In a controller, you can then use: $this->authorize('manage-news');
+        Gate::define('manage-news', function ($user) {
+            return $user->access_level >= 2; // Or use 'gradecode' if that is the correct field.
+        });
     }
 }

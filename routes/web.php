@@ -28,8 +28,8 @@
 |
 */
 
-$router->get('/', function () use ($router) {
-    return 'API powered by Lumen '.$router->app->version();
+$router->get('/', function () {
+    return redirect('/docs');
 });
 
 /*

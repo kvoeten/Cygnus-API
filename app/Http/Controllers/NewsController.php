@@ -26,30 +26,64 @@ class NewsController extends Controller {
 
 	public function __construct() {}
 
+	/**
+	 * @OA\Get(
+	 *     path="/news/{page}",
+	 *     summary="Get a paginated list of news articles",
+	 *     tags={"News"},
+	 *     @OA\Parameter(
+	 *         name="page",
+	 *         in="path",
+	 *         required=false,
+	 *         description="The page number to retrieve.",
+	 *         @OA\Schema(type="integer", default=1)
+	 *     ),
+	 *     @OA\Response(
+	 *         response=200,
+	 *         description="A paginated list of news articles."
+	 *     ),
+	 *     @OA\Response(response=404, description="No news articles found.")
+	 * )
+	 */
 	public function page($page = 1) {
-		$news = News::orderBy('created_at', 'desc')->get();
+		// Use database pagination instead of fetching all results.
+		// This is much more efficient.
+		$paginatedNews = News::orderBy('created_at', 'desc')->paginate(8, ['*'], 'page', $page);
 
-		if (sizeof($news) < 1) {
+		if ($paginatedNews->isEmpty()) {
 			return $this->error("There aren't any news articles.", 404);
 		}
 
-		$posts = array_chunk($news->toArray(), 8);
-		$pages = sizeof($posts);
-
-		if ($page > $pages || $page < 1) {
-			return $this->error("Invalid news page.", 404);
-		}
-
-		return response()->json([
-			'success' => true,
-			'prev' => ($page - 1 > 0) ? ($page - 1) : 1,
-			'current' => $page,
-			'next' => ($page + 1 < $pages) ? ($page + 1) : $pages,
-			'last' => $pages,
-			'data' => $posts[$page - 1]
-		], 200);
+		// The paginate() method returns a LengthAwarePaginator instance which is JSON serializable
+		// and includes all pagination meta data automatically.
+		return $this->success($paginatedNews, 200);
 	}
 
+	/**
+	 * @OA\Post(
+	 *     path="/article",
+	 *     summary="Create a new news article",
+	 *     tags={"News"},
+	 *     security={{"passport": {}}},
+	 *     @OA\RequestBody(
+	 *         required=true,
+	 *         description="Data for the new article.",
+	 *         @OA\JsonContent(
+	 *             required={"title", "description", "category", "content"},
+	 *             @OA\Property(property="title", type="string", example="Server Maintenance"),
+	 *             @OA\Property(property="description", type="string", example="Scheduled maintenance for next week."),
+	 *             @OA\Property(property="category", type="string", example="Updates"),
+	 *             @OA\Property(property="content", type="string", example="<p>Full article content here.</p>")
+	 *         )
+	 *     ),
+	 *     @OA\Response(
+	 *         response=201,
+	 *         description="Article created successfully."
+	 *     ),
+	 *     @OA\Response(response=401, description="Unauthorized."),
+	 *     @OA\Response(response=422, description="Validation error.")
+	 * )
+	 */
 	public function store(Request $request) {
 		$this->validateRequest($request);
 		
@@ -69,20 +103,69 @@ class NewsController extends Controller {
 		if ($post) {
 			return $this->success("The post with with id {$post->id} has been created", 201);
 		} else {
-			return $this->error("Unable to save post", 200);
+			return $this->error("Unable to save post", 500);
 		}
 	}
 
+	/**
+	 * @OA\Get(
+	 *     path="/article/{id}",
+	 *     summary="Get a single news article by ID",
+	 *     tags={"News"},
+	 *     @OA\Parameter(
+	 *         name="id",
+	 *         in="path",
+	 *         required=true,
+	 *         description="The ID of the news article.",
+	 *         @OA\Schema(type="integer")
+	 *     ),
+	 *     @OA\Response(
+	 *         response=200,
+	 *         description="The requested news article."
+	 *     ),
+	 *     @OA\Response(response=404, description="Article not found.")
+	 * )
+	 */
 	public function show($id) {
 		$post = News::find($id);
 
 		if(!$post){
-			return $this->error("The news entry with {$id} doesn't exist", 200);
+			return $this->error("The news entry with id {$id} doesn't exist", 404);
 		}
 
 		return $this->success($post, 200);
 	}
 
+	/**
+	 * @OA\Put(
+	 *     path="/article/{id}",
+	 *     summary="Update an existing news article",
+	 *     tags={"News"},
+	 *     security={{"passport": {}}},
+	 *     @OA\Parameter(
+	 *         name="id",
+	 *         in="path",
+	 *         required=true,
+	 *         description="The ID of the article to update.",
+	 *         @OA\Schema(type="integer")
+	 *     ),
+	 *     @OA\RequestBody(
+	 *         required=true,
+	 *         description="New data for the article.",
+	 *         @OA\JsonContent(
+	 *             required={"title", "description", "category", "content"},
+	 *             @OA\Property(property="title", type="string", example="Updated Title"),
+	 *             @OA\Property(property="description", type="string", example="Updated description."),
+	 *             @OA\Property(property="category", type="string", example="Events"),
+	 *             @OA\Property(property="content", type="string", example="<p>Updated content.</p>")
+	 *         )
+	 *     ),
+	 *     @OA\Response(response=200, description="Article updated successfully."),
+	 *     @OA\Response(response=401, description="Unauthorized."),
+	 *     @OA\Response(response=404, description="Article not found."),
+	 *     @OA\Response(response=422, description="Validation error.")
+	 * )
+	 */
 	public function update(Request $request, $id){
 		//Simplified access authorization
 		if($request->user()->gradecode < 2) {
@@ -92,7 +175,7 @@ class NewsController extends Controller {
 		$post = News::find($id);
 
 		if(!$post){
-			return $this->error("The post with id {$id} doesn't exist", 200);
+			return $this->error("The post with id {$id} doesn't exist", 404);
 		}
 
 		$this->validateRequest($request);
@@ -103,6 +186,24 @@ class NewsController extends Controller {
 		return $this->success("The post with with id {$post->id} has been updated", 200);
 	}
 
+	/**
+	 * @OA\Delete(
+	 *     path="/article/{id}",
+	 *     summary="Delete a news article",
+	 *     tags={"News"},
+	 *     security={{"passport": {}}},
+	 *     @OA\Parameter(
+	 *         name="id",
+	 *         in="path",
+	 *         required=true,
+	 *         description="The ID of the article to delete.",
+	 *         @OA\Schema(type="integer")
+	 *     ),
+	 *     @OA\Response(response=200, description="Article deleted successfully."),
+	 *     @OA\Response(response=401, description="Unauthorized."),
+	 *     @OA\Response(response=404, description="Article not found.")
+	 * )
+	 */
 	public function destroy(Request $request, $id) {
 		//Simplified access authorization
 		if($request->user()->gradecode < 2) {
@@ -112,7 +213,7 @@ class NewsController extends Controller {
 		$post = News::find($id);
 
 		if(!$post){
-			return $this->error("The post with id {$id} doesn't exist", 200);
+			return $this->error("The post with id {$id} doesn't exist", 404);
 		}
 
 		$post->delete();

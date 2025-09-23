@@ -41,15 +41,18 @@ class CorsMiddleware
             'Access-Control-Allow-Headers'     => 'Content-Type, Authorization, X-Requested-With'
         ];
 
+        // For OPTIONS requests, return a response with the CORS headers and a 200 status code.
+        // This handles pre-flight requests from browsers.
         if ($request->isMethod('OPTIONS'))
         {
             return response()->json('{"method":"OPTIONS"}', 200, $headers);
         }
 
         $response = $next($request);
-        foreach($headers as $key => $value)
-        {
-            $response->headers->set($key, $value);
+
+        // Add the CORS headers to the actual response.
+        foreach ($headers as $key => $value) {
+            $response->header($key, $value);
         }
 
         return $response;

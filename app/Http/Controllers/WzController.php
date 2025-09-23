@@ -27,9 +27,28 @@ class WzController extends Controller {
 
 	public function __construct() {}
 
+	/**
+	 * @OA\Get(
+	 *     path="/map/{id}",
+	 *     summary="Get WZ data for a map",
+	 *     tags={"WZ"},
+	 *     @OA\Parameter(
+	 *         name="id",
+	 *         in="path",
+	 *         required=true,
+	 *         description="The ID of the map.",
+	 *         @OA\Schema(type="string")
+	 *     ),
+	 *     @OA\Response(
+	 *         response=200,
+	 *         description="WZ data and string info for the map."
+	 *     ),
+	 *     @OA\Response(response=404, description="Map not found.")
+	 * )
+	 */
 	public function map($id) {
-		$wz = "../resources/Map.wz/".$id.".json";
-		$info = "../resources/String.wz/map/".$id.".json";
+		$wz = "../resources/wz/Map.wz/".$id.".json";
+		$info = "../resources/wz/String.wz/map/".$id.".json";
 
 		if (!file_exists($wz)) {
 			return $this->error("Map not found.", 404);
@@ -47,9 +66,28 @@ class WzController extends Controller {
 		], 200);
 	}
 
+	/**
+	 * @OA\Get(
+	 *     path="/npc/{id}",
+	 *     summary="Get WZ data for an NPC",
+	 *     tags={"WZ"},
+	 *     @OA\Parameter(
+	 *         name="id",
+	 *         in="path",
+	 *         required=true,
+	 *         description="The ID of the NPC.",
+	 *         @OA\Schema(type="string")
+	 *     ),
+	 *     @OA\Response(
+	 *         response=200,
+	 *         description="WZ data and string info for the NPC."
+	 *     ),
+	 *     @OA\Response(response=404, description="NPC not found.")
+	 * )
+	 */
 	public function npc($id) {
-		$wz = "../resources/Npc.wz/".$id.".json";
-		$info = "../resources/String.wz/npc/".$id.".json";
+		$wz = "../resources/wz/Npc.wz/".$id.".json";
+		$info = "../resources/wz/String.wz/npc/".$id.".json";
 
 		if (!file_exists($wz)) {
 			return $this->error("Npc not found.", 404);
@@ -67,9 +105,28 @@ class WzController extends Controller {
 		], 200);
 	}
 
+	/**
+	 * @OA\Get(
+	 *     path="/item/{id}",
+	 *     summary="Get WZ data for an item",
+	 *     tags={"WZ"},
+	 *     @OA\Parameter(
+	 *         name="id",
+	 *         in="path",
+	 *         required=true,
+	 *         description="The ID of the item.",
+	 *         @OA\Schema(type="string")
+	 *     ),
+	 *     @OA\Response(
+	 *         response=200,
+	 *         description="WZ data and string info for the item."
+	 *     ),
+	 *     @OA\Response(response=404, description="Item not found.")
+	 * )
+	 */
 	public function item($id) {
-		$wz = "../resources/Item.wz/".$id.".json";
-		$info = "../resources/String.wz/item/".$id.".json";
+		$wz = "../resources/wz/Item.wz/".$id.".json";
+		$info = "../resources/wz/String.wz/item/".$id.".json";
 
 		if (!file_exists($wz)) {
 			return $this->error("Item not found.", 404);
@@ -87,12 +144,31 @@ class WzController extends Controller {
 		], 200);
 	}
 
+	/**
+	 * @OA\Get(
+	 *     path="/mob/{id}",
+	 *     summary="Get WZ data for a mob",
+	 *     tags={"WZ"},
+	 *     @OA\Parameter(
+	 *         name="id",
+	 *         in="path",
+	 *         required=true,
+	 *         description="The ID of the mob.",
+	 *         @OA\Schema(type="string")
+	 *     ),
+	 *     @OA\Response(
+	 *         response=200,
+	 *         description="WZ data and string info for the mob."
+	 *     ),
+	 *     @OA\Response(response=404, description="Mob not found.")
+	 * )
+	 */
 	public function mob($id) {
-		$wz = "../resources/Mob.wz/".$id.".json";
-		$info = "../resources/String.wz/mob/".$id.".json";
+		$wz = "../resources/wz/Mob.wz/".$id.".json";
+		$info = "../resources/wz/String.wz/mob/".$id.".json";
 
 		if (!file_exists($wz)) {
-			$wz = "../resources/Mob2.wz/".$id.".json";
+			$wz = "../resources/wz/Mob2.wz/".$id.".json";
 			if (!file_exists($wz)) {
 				return $this->error("Mob not found.", 404);
 			}
@@ -110,10 +186,30 @@ class WzController extends Controller {
 		], 200);
 	}
 
+	/**
+	 * @OA\Get(
+	 *     path="/mob/image/{id}",
+	 *     summary="Get the image for a mob",
+	 *     tags={"WZ"},
+	 *     @OA\Parameter(
+	 *         name="id",
+	 *         in="path",
+	 *         required=true,
+	 *         description="The ID of the mob.",
+	 *         @OA\Schema(type="string")
+	 *     ),
+	 *     @OA\Response(
+	 *         response=200,
+	 *         description="The mob image.",
+	 *         @OA\MediaType(mediaType="image/png")
+	 *     ),
+	 *     @OA\Response(response=404, description="Mob not found.")
+	 * )
+	 */
 	public function showMob($id) {
-		$path = "../resources/Mob.wz/".$id;
+		$path = "../resources/wz/Mob.wz/".$id;
 		if (!file_exists($path.".json")) {
-			$path = "../resources/Mob2.wz/".$id;
+			$path = "../resources/wz/Mob2.wz/".$id;
 			if (!file_exists($path.".json")) {
 				return $this->error("Mob not found.", 404);
 			}
@@ -133,8 +229,28 @@ class WzController extends Controller {
 		return $response;
 	}
 
+	/**
+	 * @OA\Get(
+	 *     path="/item/image/{id}",
+	 *     summary="Get the image for an item",
+	 *     tags={"WZ"},
+	 *     @OA\Parameter(
+	 *         name="id",
+	 *         in="path",
+	 *         required=true,
+	 *         description="The ID of the item.",
+	 *         @OA\Schema(type="string")
+	 *     ),
+	 *     @OA\Response(
+	 *         response=200,
+	 *         description="The item image.",
+	 *         @OA\MediaType(mediaType="image/png")
+	 *     ),
+	 *     @OA\Response(response=404, description="Item not found.")
+	 * )
+	 */
 	public function showItem($id) {
-		$path = "../resources/Item.wz/".$id;
+		$path = "../resources/wz/Item.wz/".$id;
 		if (!file_exists($path.".json")) {
 		  return $this->error("Error. Item not found.", 404);
 		}
@@ -153,8 +269,28 @@ class WzController extends Controller {
 		return $response;
 	}
 
+	/**
+	 * @OA\Get(
+	 *     path="/npc/image/{id}",
+	 *     summary="Get the image for an NPC",
+	 *     tags={"WZ"},
+	 *     @OA\Parameter(
+	 *         name="id",
+	 *         in="path",
+	 *         required=true,
+	 *         description="The ID of the NPC.",
+	 *         @OA\Schema(type="string")
+	 *     ),
+	 *     @OA\Response(
+	 *         response=200,
+	 *         description="The NPC image.",
+	 *         @OA\MediaType(mediaType="image/png")
+	 *     ),
+	 *     @OA\Response(response=404, description="NPC not found.")
+	 * )
+	 */
 	public function showNpc($id) {
-		$path = "../resources/Npc.wz/".$id;
+		$path = "../resources/wz/Npc.wz/".$id;
 		if (!file_exists($path.".json")) {
 			return $this->error("Error. Npc not found.", 404);
 		}
@@ -173,8 +309,28 @@ class WzController extends Controller {
 		return $response;
 	}
 
+	/**
+	 * @OA\Get(
+	 *     path="/map/image/{id}",
+	 *     summary="Get the image for a map",
+	 *     tags={"WZ"},
+	 *     @OA\Parameter(
+	 *         name="id",
+	 *         in="path",
+	 *         required=true,
+	 *         description="The ID of the map.",
+	 *         @OA\Schema(type="string")
+	 *     ),
+	 *     @OA\Response(
+	 *         response=200,
+	 *         description="The map image.",
+	 *         @OA\MediaType(mediaType="image/png")
+	 *     ),
+	 *     @OA\Response(response=404, description="Map not found.")
+	 * )
+	 */
 	public function showMap($id) {
-		$path = "../resources/Map.wz/".$id;
+		$path = "../resources/wz/Map.wz/".$id;
 		if (!file_exists($path.".json")) {
 			return $this->error("Error. Map not found.", 404);
 		}
@@ -194,6 +350,29 @@ class WzController extends Controller {
 	}
 
 	//For this to work you'll have to put strings in DB.
+	/**
+	 * @OA\Get(
+	 *     path="/search",
+	 *     summary="Search for WZ data by name and type",
+	 *     tags={"WZ"},
+	 *     @OA\Parameter(
+	 *         name="name",
+	 *         in="query",
+	 *         required=true,
+	 *         description="The name to search for.",
+	 *         @OA\Schema(type="string")
+	 *     ),
+	 *     @OA\Parameter(
+	 *         name="type",
+	 *         in="query",
+	 *         required=true,
+	 *         description="The type of WZ data to search (e.g., 'item', 'mob').",
+	 *         @OA\Schema(type="string")
+	 *     ),
+	 *     @OA\Response(response=200, description="A list of matching WZ entries."),
+	 *     @OA\Response(response=404, description="Nothing found.")
+	 * )
+	 */
 	public function find(Request $request) {
 		$this->validateRequest($request);
 		$cache = DB::table('wz')->count();

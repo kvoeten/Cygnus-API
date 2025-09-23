@@ -37,6 +37,33 @@ class RegisterController extends Controller {
 	}
 
 	/**
+	 * @OA\Post(
+	 *      path="/register",
+	 *      summary="Register a new user account via Discord",
+	 *      description="Creates a new user account by exchanging a Discord authorization code for user details.",
+	 *      tags={"User"},
+	 *      @OA\RequestBody(
+	 *          required=true,
+	 *          description="User registration details",
+	 *          @OA\JsonContent(
+	 *              required={"name", "password", "birthday", "gender", "code"},
+	 *              @OA\Property(property="name", type="string", example="mapleuser", description="The desired username."),
+	 *              @OA\Property(property="password", type="string", format="password", example="secret123", description="The desired password (min 6 characters)."),
+	 *              @OA\Property(property="birthday", type="string", format="date", example="1990-01-01", description="User's birthday."),
+	 *              @OA\Property(property="gender", type="integer", example=0, description="User's gender (0 for male, 1 for female)."),
+	 *              @OA\Property(property="code", type="string", example="discord_auth_code", description="The authorization code from Discord OAuth2 flow.")
+	 *          )
+	 *      ),
+	 *      @OA\Response(
+	 *          response=200,
+	 *          description="User registered successfully."
+	 *      ),
+	 *      @OA\Response(
+	 *          response=422,
+	 *          description="Validation error (e.g., username taken, password too short, Discord account not verified)."
+	 *      )
+	 * )
+	 * 
 	 * Handles user registration
 	 */
 	public function register(Request $request) {
@@ -62,14 +89,14 @@ class RegisterController extends Controller {
 				if ($user['id']) {
 
 					if (!$user['verified']) {
-						return $this->error('The provided discord account is not verified.', 200);
+						return $this->error('The provided Discord account is not verified.', 422);
 					}
 
 					$result = User::create([
 						'name' => $request->get('name'),
 						'email' => $user['email'],
 						'discord' => $user['id'],
-						'icon' => 'http://api.maplecygnus.com/image/cygnus2.png',
+						'icon' => env('APP_URL') . '/image/cygnus2.png',
 						'password' => Hash::make($request->get('password')),
 						'birthday' => $request->get('birthday')
 					]);
@@ -86,17 +113,17 @@ class RegisterController extends Controller {
 					if ($result) {
 						return $this->success($user, 200);
 					} else {
-						return $this->error("Unable to create user.", 200);
+						return $this->error("Unable to create user.", 500);
 					}
 					
 				} else {
-					return $this->error('Unable to obtain user information. Is discord available?', 200);
+					return $this->error('Unable to obtain user information from Discord.', 503);
 				}
 			} else {
-				return $this->error('Code exchange failed. No discord authorization token was obtained.', 200);
+				return $this->error('Code exchange with Discord failed. No authorization token was obtained.', 400);
 			}
 		} catch (Exception $error) {
-			return $this->error('An unknown error has occured.', 200);
+			return $this->error('An unknown error has occurred.', 500);
 		}
 	}
 	

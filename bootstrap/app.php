@@ -29,21 +29,6 @@ $app->withFacades();
 
 $app->withEloquent();
 
-$app->configure('auth');
-
-$app->configure('mail');
-
-/*
-|--------------------------------------------------------------------------
-| Register Container Bindings
-|--------------------------------------------------------------------------
-|
-| Now we will register a few bindings in the service container. We will
-| register the exception handler and the console kernel. You may add
-| your own bindings here if you like or you can make another file.
-|
-*/
-
 $app->singleton(
     Illuminate\Contracts\Debug\ExceptionHandler::class,
     App\Exceptions\Handler::class
@@ -88,6 +73,8 @@ $app->middleware([
 |
 */
 
+$app->configure('swagger-lume');
+
 $app->register(Appzcoder\LumenRoutesList\RoutesCommandServiceProvider::class);
 $app->register(Laravel\Passport\PassportServiceProvider::class);
 $app->register(Dusterio\LumenPassport\PassportServiceProvider::class);
@@ -95,6 +82,7 @@ $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
 $app->register(\Illuminate\Mail\MailServiceProvider::class);
 $app->register(Illuminate\Notifications\NotificationServiceProvider::class);
+$app->register(\SwaggerLume\ServiceProvider::class);
 
 // $app->register(App\Providers\EventServiceProvider::class);
 

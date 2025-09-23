@@ -1,0 +1,76 @@
+services:
+  # PHP-FPM Application Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cygapi_app
+    env_file:
+      - .env
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      # Mount the application code from the host
+      - ./:/var/www/html
+      # Use an anonymous volume to preserve the vendor directory from the image
+      # This prevents the mounted volume from overwriting the vendor directory
+      # created during the image build.
+      - /var/www/html/vendor
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - cygnus-network
+
+  # Nginx Web Server Service
+  web:
+    image: nginx:alpine
+    container_name: cygapi_web
+    restart: unless-stopped
+    ports:
+      - "8080:80" # Access the API at http://localhost:8080
+    volumes:
+      - ./:/var/www/html
+      # Mount the entire nginx config directory. This is more robust
+      # and allows for adding more .conf files in the future.
+      - ./docker/nginx:/etc/nginx/conf.d
+    depends_on:
+      - app
+    networks:
+      - cygnus-network
+
+  # MailHog Service for catching emails
+  mailhog:
+    image: mailhog/mailhog
+    container_name: cygapi_mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP port for the app to connect to
+      - "8025:8025" # Web UI port to view emails
+    networks:
+      - cygnus-network
+
+  # MariaDB Database Service
+  db:
+    image: mariadb:10.5
+    container_name: cygapi_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-cygnus}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_USER: ${DB_USERNAME:-cygnus}
+    volumes:
+      - ./docker/dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USERNAME:-cygnus}", "-p${DB_PASSWORD:-secret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - cygnus-network
+
+networks:
+  cygnus-network:
+    driver: bridge

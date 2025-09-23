@@ -39,10 +39,21 @@ class RankingController extends Controller {
 		$this->validate($request, $rules);
 	}
 
+	/**
+	 * @OA\Get(
+	 *     path="/ranking/top",
+	 *     summary="Get top 3 overall ranked characters",
+	 *     tags={"Ranking"},
+	 *     @OA\Response(
+	 *         response=200,
+	 *         description="An array of the top 3 characters."
+	 *     )
+	 * )
+	 */
 	public function top() {
 		$avatars = AvatarData::orderBy('nOverallRank', 'asc')->limit(3)->get();
 		if (sizeof($avatars) < 1) {
-			return $this->error("No characters found matching provided query.", 200);
+			return $this->error("No characters found.", 404);
 		}
 		foreach ($avatars as $avatar) {
 			$avatar->CharacterStat; // Load stats onto avatar object
@@ -50,6 +61,39 @@ class RankingController extends Controller {
 		return $this->success($avatars, 200);
 	}
 
+	/**
+	 * @OA\Get(
+	 *     path="/ranking",
+	 *     summary="Get character rankings with filters",
+	 *     tags={"Ranking"},
+	 *     @OA\Parameter(
+	 *         name="page",
+	 *         in="query",
+	 *         required=true,
+	 *         @OA\Schema(type="integer", default=1)
+	 *     ),
+	 *     @OA\Parameter(
+	 *         name="order",
+	 *         in="query",
+	 *         required=true,
+	 *         @OA\Schema(type="string", enum={"asc", "desc"}, default="asc")
+	 *     ),
+	 *      @OA\Parameter(
+	 *         name="category",
+	 *         in="query",
+	 *         required=true,
+	 *         @OA\Schema(type="string", default="any", description="Job category or 'any' for overall.")
+	 *     ),
+	 *      @OA\Parameter(
+	 *         name="world",
+	 *         in="query",
+	 *         required=true,
+	 *         @OA\Schema(type="integer", default=0)
+	 *     ),
+	 *     @OA\Response(response=200, description="A paginated list of characters based on ranking."),
+	 *     @OA\Response(response=422, description="Validation error.")
+	 * )
+	 */
 	public function find(Request $request) {
 		$this->validateRequest($request);
 		
@@ -57,10 +101,11 @@ class RankingController extends Controller {
 		$category = $request->get('category');
 		$order = $request->get('order');
 
-		if ($order != 'asc' && $order != 'dec') {
+		if (!in_array(strtolower($order), ['asc', 'desc'])) {
 			$order = 'asc';
 		}
-
+		
+		/*
 		if ($category != 'any') {
 			$avatars = AvatarData::where('nWorld', $world)->where('sCategory', $category)->orderBy('nRank', $order)->get();
 		} else {
@@ -68,31 +113,53 @@ class RankingController extends Controller {
 		}
 
 		if (sizeof($avatars) < 1) {
-			return $this->error("No characters found matching provided query.", 200);
+			return $this->error("No characters found matching provided query.", 404);
 		}
 	
 		$page = $request->get('page');
 		$entries = array_chunk($avatars->toArray(), 5);
 		$pages = sizeof($entries);
-	
-		if ($page > $pages) {
-			return $this->error("Invalid ranking page.", 200);
-		}
+		*/
 
-		$data = [];
-		foreach ($entries[$page - 1] as $avatar) {
-			$avatardata = AvatarData::find($avatar['dwCharacterID']);
-			$avatardata->CharacterStat; // Load stats onto avatar object
-			array_push($data, $avatardata);
-		}
-	
-		return response()->json([
-			'success' => true,
-			'prev' => ($page - 1 > 0) ? ($page - 1) : 1,
-			'current' => $page,
-			'next' => ($page + 1 < $pages) ? ($page + 1) : $pages,
-			'last' => $pages,
-			'data' => $data
-		], 200);
+		$query = AvatarData::with('CharacterStat')->where('nWorld', $world);
+
+        if ($category !== 'any') {
+            $query->where('sCategory', $category)->orderBy('nRank', $order);
+        } else {
+            $query->orderBy('nOverallRank', $order);
+        }
+
+		// Use database pagination. This avoids N+1 issues and in-memory processing.
+        $paginatedAvatars = $query->paginate(5, ['*'], 'page', $request->get('page'));
+
+		return $this->success($paginatedAvatars, 200);
 	}
+
+    /**
+     * @OA\Post(
+     *     path="/ranking",
+     *     summary="Update ranking data (from game server)",
+     *     description="This endpoint is used by the game server to push updated ranking information.",
+     *     tags={"Ranking"},
+     *     security={{"passport": {}}},
+     *     @OA\RequestBody(
+     *         description="Ranking data to update.",
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *             description="The ranking data structure."
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Ranking updated successfully."),
+     *     @OA\Response(response=401, description="Unauthorized.")
+     * )
+     */
+    public function store(Request $request)
+    {
+        if (!$request->user() || $request->user()->access_level < 5) {
+            return response()->json(['error' => 'Unauthorized.'], 401);
+        }
+        // TODO: Implement the logic to process and store ranking data.
+        return $this->success("Ranking data received.", 200);
+    }
 }

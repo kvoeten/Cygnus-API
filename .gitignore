@@ -4,3 +4,6 @@ Homestead.json
 Homestead.yaml
 .env
 /resources/avatar/characters/*
+docker/dbdata/
+/resources/wz/*
+/storage/*

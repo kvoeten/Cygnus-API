@@ -32,11 +32,33 @@ class UserController extends Controller {
 
 	public function __construct() {}
 
-	//Only Accessible with token.
+	/**
+	 * @OA\Get(
+	 *     path="/user",
+	 *     summary="Get authenticated user's information",
+	 *     tags={"User"},
+	 *     security={{"passport": {}}},
+	 *     @OA\Response(
+	 *         response=200,
+	 *         description="The authenticated user's data."
+	 *     ),
+	 *     @OA\Response(response=401, description="Unauthorized.")
+	 * )
+	 */
 	public function get(Request $request) {
 		return $request->user();
     }
     
+    /**
+     * @OA\Get(
+     *     path="/account",
+     *     summary="Get authenticated user's game account information",
+     *     tags={"User"},
+     *     security={{"passport": {}}},
+     *     @OA\Response(response=200, description="The user's game account data."),
+     *     @OA\Response(response=401, description="Unauthorized.")
+     * )
+     */
     public function getAccount(Request $request) {
         return Account::find($request->user()->id)->first();
     }
