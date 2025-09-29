@@ -35,15 +35,6 @@ This project is configured to run in a Docker environment, which simplifies setu
     ```sh
     cp .env.example .env
     ```
-    Open the `.env` file and **change `DB_HOST` to `db`**. This allows the PHP container to connect to the database container.
-    ```
-    DB_CONNECTION=mysql
-    DB_HOST=db
-    DB_PORT=3306
-    DB_DATABASE=cygnus
-    DB_USERNAME=cygnus
-    DB_PASSWORD=secret
-    ```
 
 3.  **Build and Run Containers:**
     Use Docker Compose to build the images and start the services in the background.
@@ -58,12 +49,7 @@ This project is configured to run in a Docker environment, which simplifies setu
 
 5.  **Database and OAuth2 Setup:**
     The startup script also runs database migrations. However, you still need to set up Laravel Passport for OAuth2 authentication.
-
-    Run the `passport:install` command inside the `app` container. This will create the necessary encryption keys for generating access tokens.
-    ```sh
-    docker-compose exec app php artisan passport:install
-    ```
-    This command only needs to be run once.
+    The startup script (`entrypoint.sh`) automatically runs `php artisan passport:install` to create the necessary encryption keys for OAuth2. This step is handled for you on the first container startup.
 
 5.  **WZ Search Functionality:**
     For the WZ search functionality to work you must ensure the latest WZ strings are loaded into the SQL databse. 
