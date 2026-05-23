@@ -1,6 +1,6 @@
 # Cygnus API
 
-The Cygnus API is a RESTful Lumen API aimed at providing a multitude of endpoints for MapleStory private servers.
+The Cygnus API is a RESTful Lumen API aimed at providing a multitude of endpoints for videogame servers, particularly catered towards maplestory emulators.
 
 It's main features are:
 
